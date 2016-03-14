@@ -29,6 +29,7 @@
 #include "NX511J/msm8939-pinctrl-ztemt.dtsi"
 #include "NX511J/msm8939-camera-sensor-mtp.dtsi"
 #include "NX511J/msm8939-mtp-sdhc.dtsi"
+#include "NX511J/msm8939-mtp-ramoops.dtsi"
 / {
 	model = "Qualcomm Technologies, Inc. MSM 8939 MTP";
 	compatible = "qcom,msm8939-mtp", "qcom,msm8939", "qcom,mtp";

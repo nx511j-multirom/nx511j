@@ -1,0 +1,172 @@
+
+1.0 fs:pstore:ramoops: config mem from dt
+
+    configure the start & size of ramoops memory using device tree.
+
+    the "dummy" device is no harm as long as initial mem_size is zero.
+
+    Change-Id: If00546f8136bc564bea6ead4c3ac21367c3a6e2d
+    Signed-off-by: Yi-wei Zhao <gbjc64@motorola.com>
+    Reviewed-by: Jeffrey Carlyle <jeff.carlyle@motorola.com>
+
+2.0  pstore: clarify clearing of _read_cnt in ramoops_context
+
+    *_read_cnt in ramoops_context need to be cleared during pstore ->open to
+    support mutli times getting the records.  The patch added missed
+    ftrace_read_cnt clearing and removed duplicate clearing in ramoops_probe.
+
+    Signed-off-by: Liu ShuoX <shuox.liu@intel.com>
+    Cc: "Zhang, Yanmin" <yanmin_zhang@linux.intel.com>
+    Cc: Colin Cross <ccross@android.com>
+    Cc: Kees Cook <keescook@chromium.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Tony Luck <tony.luck@intel.com>
+    Change-Id: I98622b2587ed661884e74a7273cfc92ee99eaae3
+
+3.0  [PATCH v4 1/5] pstore: use snprintf
+
+    No guarantees that the names will not exceed the
+    name buffer with future adjustments.
+
+    Signed-off-by: Mark Salyzyn <salyzyn@android.com>
+    Acked-by: Joe Perches <joe@perches.com>
+
+    v2: switch from snprintf to scnprintf
+    v3: remove embedded space
+    v4: renumber pmsg series dependencies
+
+    Change-Id: I161fe8cadc967d74e18cc09b7d60b5b398c92c86
+
+4.0  [PATCH v2 2/5] pstore: remove superfluous memory size check
+
+    All previous checks will fail with error if memory size
+    is not sufficient to register a zone, so this legacy
+    check has become redundant.
+
+    Signed-off-by: Mark Salyzyn <salyzyn@android.com>
+    Acked-by: Kees Cook <keescook@chromium.org>
+
+    v2: renumber pmsg series dependencies
+
+    Change-Id: Ie21c988ae0b1ebb0dafa6c0c0b069e9cfe1e8506
+
+
+5.0  [PATCH 3/5] pstore: handle zero-sized prz in series
+
+    Corrects a problem wih ramoops_pstore_read failing to
+    return the next in a prz series after first zero-sized
+    entry, not venturing to the next non-zero entry.
+
+    Signed-off-by: Mark Salyzyn <salyzyn@android.com>
+    Change-Id: Iedce3b94c13917da33be44e1d80811757774c793
+
+6.0  [PATCH v4 4/5] pstore: add pmsg
+
+    A secured user-space accessible pstore object. Writes
+    to /dev/pmsg0 are appended to the buffer, on reboot
+    the persistent contents are available in
+    /sys/fs/pstore/pmsg-ramoops-[ID].
+
+    One possible use is syslogd, or other daemon, can
+    write messages, then on reboot provides a means to
+    triage user-space activities leading up to a panic
+    as a companion to the pstore dmesg or console logs.
+
+    Signed-off-by: Mark Salyzyn <salyzyn@android.com>
+
+    v2: switch from snprintf to scnprintf
+    v3: split out prz_ok checking into PATCH 3/5
+        replace pmsg_lseek with noop_llseek
+        use pr_fmt() macro
+    make write atomic and use a vmalloc'd bounce buffer
+    v4: use mutex_lock instead of spin_lock.
+
+    Change-Id: I82a2a9a989d7583c5fcb65ff520027dc3a034a4c
+
+7.0  pstore/ram: remove the power of buffer size limitation
+
+    There doesn't appear to be any reason for the overall pstore RAM buffer to
+    be a power of 2 size, so remove it. The individual console, ftrace and oops
+    buffers are still a power of 2 size.
+
+    Signed-off-by: Rob Herring <rob.herring@calxeda.com>
+    Acked-by: Anton Vorontsov <anton@enomsg.org>
+    Signed-off-by: Tony Luck <tony.luck@intel.com>
+
+    Change-Id: Ia76e4fd1ffc7fb6488ed6cd69f58b5f10eea05d4
+
+
+8.0  pstore/ram: (really) fix undefined usage of rounddown_pow_of_two
+
+    Previous attempt to fix was b042e47
+
+    Suggested use of is_power_of_2() was bogus because is_power_of_2(0) is
+    false (documented behaviour).
+
+    Signed-off-by: Maxime Bizon <mbizon@freebox.fr>
+    Acked-by: Kees Cook <keescook@chromium.org>
+    Signed-off-by: Tony Luck <tony.luck@intel.com>
+
+    Change-Id: I167b2d40cc87753839a383b7352c9964b54e8400
+
+9.0  pstore/ram: avoid atomic accesses for ioremapped regions
+
+    For persistent RAM outside of main memory, the memory may have limitations
+    on supported accesses. For internal RAM on highbank platform exclusive
+    accesses are not supported and will hang the system. So atomic_cmpxchg
+    cannot be used. This commit uses spinlock protection for buffer size and
+    start updates on ioremapped regions instead.
+
+    Signed-off-by: Rob Herring <rob.herring@calxeda.com>
+    Acked-by: Anton Vorontsov <anton@enomsg.org>
+    Signed-off-by: Tony Luck <tony.luck@intel.com>
+
+    Change-Id: I067a8011d79f4b961d48ac40c88df6e7cffe60a2
+
+10.0  pstore: Fix buffer overflow while write offset equal to buffer size
+
+    In case new offset is equal to prz->buffer_size, it won't wrap at this
+    time and will return old(overflow) value next time.
+
+    Signed-off-by: Liu ShuoX <shuox.liu@intel.com>
+    Acked-by: Kees Cook <keescook@chromium.org>
+    Signed-off-by: Tony Luck <tony.luck@intel.com>
+
+    Change-Id: I2a7e03a9a2b6dd22b6105cc5ebaf2d858083e5db
+
+
+11.0 pstore/ram: Add missing DT parameters
+
+    android,ramoops-record-size and dump-oops got dropped between K and L.
+    Add them back to allow more control over ramoops parameters.
+
+    K implementation is from:
+
+	    Bryan Freed <bfreed@chromium.org>
+	    CHROMIUM: ramoops: Add support for the Flattened Device Tree.
+
+    L implementation is from:
+
+	    Yi-wei Zhao <gbjc64@motorola.com>
+	    fs:pstore:ramoops: config mem from dt
+
+    Change-Id: I84f8cb58c3a8c6a64eb6b9f39d0c21e8904da680
+
+12.0  PSTORE: add pstore and ramoops support
+
+        * The feature formerly known as "last_kmsg" makes it's triumphant
+        return under it's new name, "console-ramoops"!
+        * Enjoy the very best post-mortem crash analysis now at:
+            /sys/fs/pstore/console-ramoops
+
+        Change-Id: Idf688a48e98694755b945ea7f885800071a0ae69
+
+13.0  ARM: dts: nx511j: Update ramoops parameters
+
+    * Set android,ramoops-record-size to the value used in K.
+
+    * Remove android,ramoops-annotate-size as it is unused.
+
+    Change-Id: Icd2dbcd009cc50184b209ed2af5726647534fd64
+
+
