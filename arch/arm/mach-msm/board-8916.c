@@ -33,6 +33,11 @@ static void __init msm8916_dt_reserve(void)
 	of_scan_flat_dt(dt_scan_for_memory_reserve, NULL);
 }
 
+static void __init msm8916_early_memory(void)
+{
+	of_scan_flat_dt(dt_scan_for_memory_hole, NULL);
+}
+
 static void __init msm8916_map_io(void)
 {
 	msm_map_msm8916_io();
@@ -106,6 +111,7 @@ DT_MACHINE_START(MSM8916_DT,
 	.init_machine = msm8916_init,
 	.dt_compat = msm8916_dt_match,
 	.reserve = msm8916_dt_reserve,
+	.init_very_early = msm8916_early_memory,
 	.smp = &msm8916_smp_ops,
 MACHINE_END
 
@@ -115,6 +121,7 @@ DT_MACHINE_START(MSM8939_DT,
 	.init_machine = msm8916_init,
 	.dt_compat = msm8939_dt_match,
 	.reserve = msm8916_dt_reserve,
+	.init_very_early = msm8916_early_memory,
 	.smp = &msm8936_smp_ops,
 MACHINE_END
 
@@ -124,6 +131,7 @@ DT_MACHINE_START(MSM8936_DT,
 	.init_machine = msm8916_init,
 	.dt_compat = msm8936_dt_match,
 	.reserve = msm8916_dt_reserve,
+	.init_very_early = msm8916_early_memory,
 	.smp = &msm8936_smp_ops,
 MACHINE_END
 
@@ -133,6 +141,7 @@ DT_MACHINE_START(MSM8929_DT,
 	.init_machine = msm8916_init,
 	.dt_compat = msm8929_dt_match,
 	.reserve = msm8916_dt_reserve,
+	.init_very_early = msm8916_early_memory,
 	.smp = &msm8936_smp_ops,
 MACHINE_END
 
@@ -142,5 +151,6 @@ DT_MACHINE_START(MSMTellurium_DT,
 	.init_machine = msm8916_init,
 	.dt_compat = msmtellurium_dt_match,
 	.reserve = msm8916_dt_reserve,
+	.init_very_early = msm8916_early_memory,
 	.smp = &msm8936_smp_ops,
 MACHINE_END
